@@ -1,0 +1,6 @@
+Patch 1.1
+- Separated admin role from doctor.
+- Moved dictionary tabs to admin.
+- Removed possibility of any user create doctor account from registration.
+- Made User-tab for admin. Now Admin able to delete users and create "certified" doctors.
+- Made 10 min-gaps between appointments to specific doctor.

@@ -13,19 +13,23 @@ function authMiddleware(req, res, next) {
 }
 
 // Role-based access to routes
-function roleMiddleware(role) {
+function roleMiddleware(roles) {
   return function (req, res, next) {
     if (req.method === "OPTIONS") {
       return next();
     }
 
-    if (req.session.user.role !== role) {
+    const userRole = req.session.user.role;
+    const authorized = Array.isArray(roles)
+      ? roles.includes(userRole)
+      : userRole === roles;
+
+    if (!authorized) {
       return res
         .status(403)
         .json({ message: "Access denied: insufficient permissions" });
     }
 
-    req.user = req.session.user;
     next();
   };
 }

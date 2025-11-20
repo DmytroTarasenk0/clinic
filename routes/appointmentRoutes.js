@@ -5,7 +5,7 @@ const { authMiddleware, roleMiddleware } = require("../middleware/middleware");
 
 const isAuth = authMiddleware;
 const isPatient = roleMiddleware("patient");
-const isAdmin = roleMiddleware("admin");
+const isDoctor = roleMiddleware("doctor");
 
 // Create(schedule) appointment for patient
 router.post("/", [isAuth, isPatient], appointmentController.create);
@@ -23,7 +23,7 @@ router.patch(
 // Update(complete) appointment by doctor
 router.post(
   "/:id/complete",
-  [isAuth, isAdmin],
+  [isAuth, isDoctor],
   appointmentController.completeByDoctor
 );
 

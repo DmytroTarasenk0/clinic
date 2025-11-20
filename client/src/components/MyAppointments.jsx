@@ -48,7 +48,6 @@ const MyAppointments = ({ refreshTrigger, onRefreshed, onViewRecord }) => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
 
   const handlePrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
-  // -------------------------
 
   const handleCancel = async (appointmentId) => {
     if (!window.confirm("Are you sure you want to cancel this appointment?"))

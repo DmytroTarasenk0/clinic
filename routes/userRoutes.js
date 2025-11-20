@@ -1,10 +1,14 @@
 const Router = require("express");
 const router = new Router();
 const userController = require("../controllers/userController");
-const { authMiddleware } = require("../middleware/middleware");
+const { authMiddleware, roleMiddleware } = require("../middleware/middleware");
 
 // Create new user
 router.post("/register", userController.register);
+
+router.post("/create-doctor", 
+    [authMiddleware, roleMiddleware("admin")], 
+    userController.createDoctor);
 
 // User login
 router.post("/login", userController.login);

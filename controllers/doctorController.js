@@ -1,4 +1,9 @@
-const { Doctor, User, Specialization } = require("../models/main.js");
+const {
+  Doctor,
+  User,
+  Specialization,
+  Appointment,
+} = require("../models/main.js");
 const { sequelize } = require("../models/main.js");
 
 class DoctorController {
@@ -73,7 +78,13 @@ class DoctorController {
       if (!doctor) {
         return res.status(404).json({ message: "Can't find doctor" });
       }
+
+      await Appointment.destroy({
+        where: { doctor_id: id },
+        transaction: t,
+      });
       await User.destroy({ where: { id: doctor.user_id }, transaction: t });
+
       await t.commit();
       return res.json({
         message: "Doctor and associated user account successfully deleted",

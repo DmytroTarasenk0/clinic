@@ -3,7 +3,7 @@ const { User, Patient, Doctor } = require("../models/main.js");
 require("dotenv").config();
 
 class UserController {
-  // Create User(registration)
+  // Create User(registration, Patient)
   async register(req, res) {
     try {
       const {
@@ -15,10 +15,15 @@ class UserController {
         dateOfBirth,
         phone,
         sexId,
-        specializationId,
       } = req.body;
 
-      if (!username || !password || !role || !firstName || !lastName) {
+      if (role !== "patient") {
+        return res.status(403).json({
+          message: "Public registration is only available for patients",
+        });
+      }
+
+      if (!username || !password || !firstName || !lastName) {
         return res
           .status(400)
           .json({ message: "Registration data is incomplete" });
@@ -36,37 +41,23 @@ class UserController {
       const user = await User.create({
         username,
         password_hash: hashPassword,
-        role,
+        role: "patient",
       });
 
-      // Patient or Doctor profile creation
-      if (role === "patient") {
-        if (!dateOfBirth) {
-          return res
-            .status(400)
-            .json({ message: "Can't register patient without date of birth" });
-        }
-        await Patient.create({
-          user_id: user.id,
-          first_name: firstName,
-          last_name: lastName,
-          date_of_birth: dateOfBirth,
-          phone_number: phone,
-          sex_id: sexId,
-        });
-      } else if (role === "admin") {
-        if (!specializationId) {
-          return res
-            .status(400)
-            .json({ message: "Can't register doctor without specialization" });
-        }
-        await Doctor.create({
-          user_id: user.id,
-          first_name: firstName,
-          last_name: lastName,
-          specialization_id: specializationId,
-        });
+      if (!dateOfBirth) {
+        return res
+          .status(400)
+          .json({ message: "Can't register patient without date of birth" });
       }
+
+      await Patient.create({
+        user_id: user.id,
+        first_name: firstName,
+        last_name: lastName,
+        date_of_birth: dateOfBirth,
+        phone_number: phone,
+        sex_id: sexId,
+      });
 
       // Create session for the new user
       req.session.user = {
@@ -76,6 +67,53 @@ class UserController {
       };
 
       return res.status(201).json(req.session.user);
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ message: e.message });
+    }
+  }
+
+  // Create User(Doctor) by Admin
+  async createDoctor(req, res) {
+    try {
+      const { username, password, firstName, lastName, specializationId } =
+        req.body;
+
+      if (
+        !username ||
+        !password ||
+        !firstName ||
+        !lastName ||
+        !specializationId
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Doctor creation data is incomplete" });
+      }
+
+      const candidate = await User.findOne({ where: { username } });
+      if (candidate) {
+        return res
+          .status(409)
+          .json({ message: "User with this username already exists" });
+      }
+
+      const hashPassword = await bcrypt.hash(password, 5);
+
+      const user = await User.create({
+        username,
+        password_hash: hashPassword,
+        role: "doctor",
+      });
+
+      await Doctor.create({
+        user_id: user.id,
+        first_name: firstName,
+        last_name: lastName,
+        specialization_id: specializationId,
+      });
+
+      return res.status(201).json({ message: "Doctor created successfully" });
     } catch (e) {
       console.error(e);
       res.status(500).json({ message: e.message });

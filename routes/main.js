@@ -10,6 +10,7 @@ const symptomRouter = require("./symptomRoutes");
 const medicationRouter = require("./medicationRoutes");
 const medicalRecordRouter = require("./medicalRecordRoutes");
 const sexRouter = require("./sexRoutes");
+const patientRouter = require("./patientRoutes");
 
 router.use("/user", userRouter);
 router.use("/specialization", specializationRouter);
@@ -20,5 +21,6 @@ router.use("/symptom", symptomRouter);
 router.use("/medication", medicationRouter);
 router.use("/record", medicalRecordRouter);
 router.use("/sex", sexRouter);
+router.use("/patient", patientRouter);
 
 module.exports = router;

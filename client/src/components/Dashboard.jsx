@@ -5,6 +5,7 @@ import MyAppointments from "./MyAppointments.jsx";
 import DoctorAppointments from "./admin/DoctorAppointments.jsx";
 import DictionaryManager from "./admin/DictionaryManager.jsx";
 import MedicalRecordView from "./MedicalRecordView.jsx";
+import UserList from "./admin/UserList.jsx";
 
 // Field configs for DictionaryManager
 const specializationFields = [
@@ -31,15 +32,14 @@ const medicationFields = [
   },
 ];
 
-// Doctor POV
-const DoctorDashboard = ({ onViewRecord }) => {
-  const [activeTab, setActiveTab] = useState("appointments"); // Tab
+// Admin POV
+const AdminDashboard = () => {
+  const [activeTab, setActiveTab] = useState("users"); // Tab
 
-  // Change tab content
   const renderTabContent = () => {
     switch (activeTab) {
-      case "appointments":
-        return <DoctorAppointments onViewRecord={onViewRecord} />;
+      case "users":
+        return <UserList />;
       case "specializations":
         return (
           <DictionaryManager
@@ -76,10 +76,10 @@ const DoctorDashboard = ({ onViewRecord }) => {
         return null;
     }
   };
-
   return (
     <div>
-      <h2>Doctor's Panel</h2>
+      <h2>Admin Panel</h2>
+
       <nav
         style={{
           marginBottom: "1.5rem",
@@ -91,10 +91,10 @@ const DoctorDashboard = ({ onViewRecord }) => {
         }}
       >
         <button
-          onClick={() => setActiveTab("appointments")}
-          disabled={activeTab === "appointments"}
+          onClick={() => setActiveTab("users")}
+          disabled={activeTab === "users"}
         >
-          My appointments
+          Users
         </button>
         <button
           onClick={() => setActiveTab("specializations")}
@@ -122,6 +122,17 @@ const DoctorDashboard = ({ onViewRecord }) => {
         </button>
       </nav>
       <div>{renderTabContent()}</div>
+    </div>
+  );
+};
+
+// Doctor POV
+const DoctorDashboard = ({ onViewRecord }) => {
+  return (
+    <div>
+      <h2>Doctor's Panel</h2>
+      <hr />
+      <DoctorAppointments onViewRecord={onViewRecord} />
     </div>
   );
 };
@@ -166,6 +177,8 @@ const Dashboard = () => {
   return (
     <div>
       {user.role === "admin" ? (
+        <AdminDashboard />
+      ) : user.role === "doctor" ? (
         <DoctorDashboard onViewRecord={handleViewRecord} />
       ) : (
         <PatientDashboard onViewRecord={handleViewRecord} />
