@@ -59,7 +59,6 @@ class MedicalRecordController {
             ],
           },
         ],
-        // ------------------------------------
       });
 
       console.log(
@@ -84,8 +83,8 @@ class MedicalRecordController {
         if (patient && medicalRecord.patient_id === patient.id) {
           hasAccess = true; // Patient can only access their own records
         }
-      } else if (userRole === "admin") {
-        hasAccess = true; // Admins have access to all records
+      } else if (userRole === "doctor" || userRole === "admin") {
+        hasAccess = true; // Admins and Doctors have access to all records
       }
       console.log(
         `User ID: ${userId}, Role: ${userRole}, Record Patient ID: ${medicalRecord.patient_id}, Has Access: ${hasAccess}`

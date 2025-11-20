@@ -6,6 +6,7 @@ const {
   MedicalRecord,
   sequelize,
 } = require("../models/main.js");
+const { Op } = require("sequelize");
 
 class AppointmentController {
   // Create Appointment
@@ -19,6 +20,29 @@ class AppointmentController {
           message: "Not found patient profile for the user",
         });
       }
+
+      // Check for appointments within +/- 10 minutes
+      const newTime = new Date(appointment_time);
+      const checkRangeStart = new Date(newTime.getTime() - 10 * 60000);
+      const checkRangeEnd = new Date(newTime.getTime() + 10 * 60000);
+
+      const conflictingAppointment = await Appointment.findOne({
+        where: {
+          doctor_id: doctorId,
+          status: "scheduled",
+          appointment_time: {
+            [Op.between]: [checkRangeStart, checkRangeEnd],
+          },
+        },
+      });
+
+      if (conflictingAppointment) {
+        return res.status(409).json({
+          message:
+            "The doctor already has an appointment scheduled around this time. Please choose a different time.",
+        });
+      }
+
       const appointment = await Appointment.create({
         patient_id: patient.id,
         doctor_id: doctorId,
@@ -79,7 +103,7 @@ class AppointmentController {
             .json({ message: "Can't find patient profile" });
         whereClause = { patient_id: patient.id }; // Filter by patient ID
         includeClause = baseInclude.filter((inc) => inc.model !== Patient);
-      } else if (role === "admin") {
+      } else if (role === "doctor") {
         const doctor = await Doctor.findOne({
           attributes: ["id"],
           where: { user_id: id },
@@ -88,6 +112,8 @@ class AppointmentController {
           return res.status(404).json({ message: "Can't find doctor profile" });
         whereClause = { doctor_id: doctor.id }; // Filter by doctor ID
         includeClause = baseInclude.filter((inc) => inc.model !== Doctor);
+      } else if (role === "admin") {
+        return res.json([]);
       } else {
         return res.status(403).json({ message: "Unknown role" });
       }

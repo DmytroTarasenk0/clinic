@@ -4,22 +4,22 @@ const medicalRecordController = require("../controllers/medicalRecordController"
 const { authMiddleware, roleMiddleware } = require("../middleware/middleware");
 
 const isAuth = authMiddleware;
-const isAdmin = roleMiddleware("admin");
+const isDoctor = roleMiddleware("doctor");
 
 // Read by id
 router.get("/:id", isAuth, medicalRecordController.getOne);
 
-// Create diagnosis for medical record (admin)
+// Create diagnosis for medical record (doctor)
 router.post(
   "/:id/diagnosis",
-  [isAuth, isAdmin],
+  [isAuth, isDoctor],
   medicalRecordController.addDiagnosis
 );
 
-// Delete diagnosis from medical record (admin)
+// Delete diagnosis from medical record (doctor)
 router.delete(
   "/:id/diagnosis/:diagnosisId",
-  [isAuth, isAdmin],
+  [isAuth, isDoctor],
   medicalRecordController.removeDiagnosis
 );
 

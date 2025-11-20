@@ -19,7 +19,7 @@ const MedicalRecordView = ({ recordId, onClose }) => {
       setRecord(recordRes.data);
 
       // Give a doctor the ability to add diagnoses
-      if (user?.role === "admin") {
+      if (user?.role === "doctor") {
         const diagnosesRes = await axios.get(
           "http://localhost:5000/api/diagnosis"
         );
@@ -190,7 +190,7 @@ const MedicalRecordView = ({ recordId, onClose }) => {
               >
                 <strong>{diag.name}</strong>
                 {/* Delete button for doctor */}
-                {user?.role === "admin" && (
+                {user?.role === "doctor" && (
                   <button
                     onClick={() => handleRemoveDiagnosis(diag.id)}
                     className="button-danger"
@@ -236,7 +236,7 @@ const MedicalRecordView = ({ recordId, onClose }) => {
         )}
 
         {/* Doctor section to add a diagnosis */}
-        {user?.role === "admin" && (
+        {user?.role === "doctor" && (
           <div
             style={{
               marginTop: "1.5rem",

@@ -20,17 +20,12 @@ const Register = () => {
   const navigate = useNavigate();
 
   const [sexes, setSexes] = useState([]);
-  const [specializations, setSpecializations] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [sexRes, specRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/sex"),
-          axios.get("http://localhost:5000/api/specialization"),
-        ]);
-        setSexes(sexRes.data);
-        setSpecializations(specRes.data);
+        const response = await axios.get("http://localhost:5000/api/sex");
+        setSexes(response.data);
       } catch (err) {
         console.error(err);
         setMessage("Can't load registration data.");
@@ -56,41 +51,24 @@ const Register = () => {
       !formData.username ||
       !formData.password ||
       !formData.firstName ||
-      !formData.lastName
+      !formData.lastName ||
+      !formData.dateOfBirth ||
+      !formData.sexId
     ) {
       setMessage("Please fill in all required fields.");
       return;
     }
 
-    let userData = {
+    const userData = {
       username: formData.username,
       password: formData.password,
-      role: formData.role,
+      role: "patient",
       firstName: formData.firstName,
       lastName: formData.lastName,
+      dateOfBirth: formData.dateOfBirth,
+      phone: formData.phone,
+      sexId: parseInt(formData.sexId, 10),
     };
-
-    if (formData.role === "patient") {
-      if (!formData.dateOfBirth || !formData.sexId) {
-        setMessage("Date of Birth and Sex are required for patients.");
-        return;
-      }
-      userData = {
-        ...userData,
-        dateOfBirth: formData.dateOfBirth,
-        phone: formData.phone,
-        sexId: parseInt(formData.sexId, 10),
-      };
-    } else if (formData.role === "admin") {
-      if (!formData.specializationId) {
-        setMessage("Specialization is required for admins.");
-        return;
-      }
-      userData = {
-        ...userData,
-        specializationId: parseInt(formData.specializationId, 10),
-      };
-    }
 
     try {
       await register(userData);
@@ -145,70 +123,40 @@ const Register = () => {
           />
         </div>
         <div>
-          <label>Role:</label>
-          <select name="role" value={formData.role} onChange={handleChange}>
-            <option value="patient">Patient</option>
-            <option value="admin">Doctor</option>
+          <label>Date of Birth:</label>
+          <input
+            type="date"
+            name="dateOfBirth"
+            value={formData.dateOfBirth}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <label>Phone Number:</label>
+          <input
+            type="tel"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Sex:</label>
+          <select
+            name="sexId"
+            value={formData.sexId}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select</option>
+            {sexes.map((sex) => (
+              <option key={sex.id} value={sex.id}>
+                {sex.sex_name}
+              </option>
+            ))}
           </select>
         </div>
-        {/* fields dependent on role */}
-        {formData.role === "patient" && (
-          <>
-            <div>
-              <label>Date of Birth:</label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div>
-              <label>Phone Number:</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Sex:</label>
-              <select
-                name="sexId"
-                value={formData.sexId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select</option>
-                {sexes.map((sex) => (
-                  <option key={sex.id} value={sex.id}>
-                    {sex.sex_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </>
-        )}
-        {formData.role === "admin" && (
-          <div>
-            <label>Specialization:</label>
-            <select
-              name="specializationId"
-              value={formData.specializationId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select</option>
-              {specializations.map((spec) => (
-                <option key={spec.id} value={spec.id}>
-                  {spec.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
         <button type="submit">Register</button>
       </form>
       {message && <p style={{ color: "red" }}>{message}</p>}
